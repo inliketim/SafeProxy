@@ -54,7 +54,10 @@ SafeProxy.safeParameters = function(funcToProxy){
 				}
 			};
 		}
-		funcToProxy.apply(undefined, safeArguments);
+		//TODO: write a test that fails when we pass undefined rather than this, as the first argument to apply().
+		// For example, wrapping jQuery's .on() method will cause errors.
+		//Get a full understanding of what's happening here and make the right fix if just passing "this" is not always correct.
+		funcToProxy.apply(this, safeArguments);
 	};
 	return result;
 }
