@@ -96,4 +96,32 @@ QUnit.test("SafeProxy.safeParameters replaces each function in a method's parame
 	assert.equal(args[2], stubbedSafeFunction2,"Calls the original method with a safe version of each function parameter");
 });
 
+QUnit.test("Value of 'this' inside a function will be the same whether the function is called directly or through the SafeProxy.safe version", function(assert){
+	lastThis = null;
+	rememberThis = function(){
+		lastThis = this;
+	};
+	safeRememberThis = SafeProxy.safe(rememberThis);
+	fakeThis = new Object();
+	rememberThis.apply(fakeThis,[]);
+	unsafeThis = lastThis;
+	rememberThis.trackingCode++;
+	safeRememberThis.apply(fakeThis,[]);
+	safeThis = lastThis;
+	assert.equal(unsafeThis, safeThis);
+});
 
+QUnit.test("Value of 'this' inside a function will be the same whether the function is called directly or through the SafeProxy.safeParameters v	version", function(assert){
+	lastThis = null;
+	rememberThis = function(){
+		lastThis = this;
+	};
+	safeRememberThis = SafeProxy.safeParameters(rememberThis);
+	fakeThis = new Object();
+	rememberThis.apply(fakeThis,[]);
+	unsafeThis = lastThis;
+	rememberThis.trackingCode++;
+	safeRememberThis.apply(fakeThis,[]);
+	safeThis = lastThis;
+	assert.equal(unsafeThis, safeThis);	
+});
