@@ -28,7 +28,8 @@ SafeProxy = {};
 SafeProxy.safe = function(funcToProxy){
 	var result = function(){
 		try{
-			funcToProxy.apply(undefined, arguments);
+			//TODO: write a test to prove that passing "this" through is necessary and correct
+			funcToProxy.apply(this, arguments);
 		}
 		catch(err){
 			handler = function(){
@@ -54,9 +55,7 @@ SafeProxy.safeParameters = function(funcToProxy){
 				}
 			};
 		}
-		//TODO: write a test that fails when we pass undefined rather than this, as the first argument to apply().
-		// For example, wrapping jQuery's .on() method will cause errors.
-		//Get a full understanding of what's happening here and make the right fix if just passing "this" is not always correct.
+		//TODO: write a test to prove that passing "this" through is necessary and correct
 		funcToProxy.apply(this, safeArguments);
 	};
 	return result;
