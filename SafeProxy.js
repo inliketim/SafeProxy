@@ -23,7 +23,7 @@ SOFTWARE.
 
 */
 
-SafeProxy = {};
+var SafeProxy = SafeProxy || {};
 
 SafeProxy.safe = function(funcToProxy){
 	var result = function(){
@@ -31,7 +31,7 @@ SafeProxy.safe = function(funcToProxy){
 			funcToProxy.apply(this, arguments);
 		}
 		catch(err){
-			handler = function(){
+			var handler = function(){
 				throw err;
 			};
 			setTimeout(handler, 1);
@@ -42,11 +42,13 @@ SafeProxy.safe = function(funcToProxy){
 
 SafeProxy.safeParameters = function(funcToProxy){
 	var result = function(){
-		safeArguments = [];
+		var safeArguments = [];
+		var functionParameterPassed = false;
 		if(arguments && arguments.length){
 			for(index=0; index < arguments.length; ++index){
-				unsafeArg = arguments[index];
+				var unsafeArg = arguments[index];
 				if(typeof(unsafeArg)==="function"){
+					functionParameterPassed = true;
 					safeArguments.push(SafeProxy.safe(unsafeArg))
 				}
 				else{
@@ -54,7 +56,15 @@ SafeProxy.safeParameters = function(funcToProxy){
 				}
 			};
 		}
+		if (!functionParameterPassed){
+			throw(new SafeProxy.ArgumentError("At least one function argument is required"));
+		};
 		funcToProxy.apply(this, safeArguments);
 	};
 	return result;
 }
+
+SafeProxy.ArgumentError = function(message){
+	this.message = message;
+};
+SafeProxy.ArgumentError.prototype = new Error;
