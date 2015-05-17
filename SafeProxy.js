@@ -26,45 +26,49 @@ SOFTWARE.
 var SafeProxy = SafeProxy || {};
 
 SafeProxy.safe = function(funcToProxy){
-	var result = function(){
-		try{
-			funcToProxy.apply(this, arguments);
-		}
-		catch(err){
-			var handler = function(){
-				throw err;
-			};
-			setTimeout(handler, 1);
-		};
-	};
-	return result;
+  "use strict";
+  var result = function(){
+    try{
+      funcToProxy.apply(this, arguments);
+    }
+    catch(err){
+      var handler = function(){
+        throw err;
+      };
+      setTimeout(handler, 1);
+    }
+  };
+  return result;
 };
 
 SafeProxy.safeParameters = function(funcToProxy){
-	var result = function(){
-		var safeArguments = [];
-		var functionParameterPassed = false;
-		if(arguments && arguments.length){
-			for(index=0; index < arguments.length; ++index){
-				var unsafeArg = arguments[index];
-				if(typeof(unsafeArg)==="function"){
-					functionParameterPassed = true;
-					safeArguments.push(SafeProxy.safe(unsafeArg))
-				}
-				else{
-					safeArguments.push(unsafeArg);
-				}
-			};
-		}
-		if (!functionParameterPassed){
-			throw(new SafeProxy.ArgumentError("At least one function argument is required"));
-		};
-		funcToProxy.apply(this, safeArguments);
-	};
-	return result;
-}
+  "use strict";
+  var result = function(){
+    var safeArguments = [];
+    var functionParameterPassed = false;
+    if(arguments && arguments.length){
+      var i, unsafeArg;
+      for (i=0; i < arguments.length; i += 1){
+        unsafeArg = arguments[i];
+        if(typeof(unsafeArg)==="function"){
+          functionParameterPassed = true;
+          safeArguments.push(SafeProxy.safe(unsafeArg));
+        }
+        else{
+          safeArguments.push(unsafeArg);
+        }
+      }
+    }
+    if (!functionParameterPassed){
+      throw(new SafeProxy.ArgumentError("At least one function argument is required"));
+    }
+    funcToProxy.apply(this, safeArguments);
+  };
+  return result;
+};
 
 SafeProxy.ArgumentError = function(message){
-	this.message = message;
+  "use strict";
+  this.message = message;
 };
-SafeProxy.ArgumentError.prototype = new Error;
+SafeProxy.ArgumentError.prototype = new Error();
