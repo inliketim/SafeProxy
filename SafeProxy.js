@@ -27,42 +27,19 @@ var SafeProxy = SafeProxy || {};
 
 SafeProxy.safe = function(funcToProxy){
   "use strict";
+  if (typeof(funcToProxy)!=="function"){
+    throw(new SafeProxy.ArgumentError("argument must be a function"));
+  }
   var result = function(){
     try{
       funcToProxy.apply(this, arguments);
     }
     catch(err){
-      var handler = function(){
+      var handler = function(){ 
         throw err;
       };
       setTimeout(handler, 1);
     }
-  };
-  return result;
-};
-
-SafeProxy.safeParameters = function(funcToProxy){
-  "use strict";
-  var result = function(){
-    var safeArguments = [];
-    var functionParameterPassed = false;
-    if(arguments && arguments.length){
-      var i, unsafeArg;
-      for (i=0; i < arguments.length; i += 1){
-        unsafeArg = arguments[i];
-        if(typeof(unsafeArg)==="function"){
-          functionParameterPassed = true;
-          safeArguments.push(SafeProxy.safe(unsafeArg));
-        }
-        else{
-          safeArguments.push(unsafeArg);
-        }
-      }
-    }
-    if (!functionParameterPassed){
-      throw(new SafeProxy.ArgumentError("At least one function argument is required"));
-    }
-    funcToProxy.apply(this, safeArguments);
   };
   return result;
 };

@@ -84,34 +84,13 @@ QUnit.test("Safe call to a failing function will raise the original exception", 
   assert.ok(true, "this test will throw an exception outside of the normal qUnit structure if it fails.");
 });
 
-QUnit.test("SafeProxy.safeParameters replaces each function in a method's parameters with a safe version of the same function", function(assert){
-  "use strict";
-  //ARRANGE:
-  var originalMethod = this.spy();
-  var func1 = function(){};
-  var func2 = function(){};
-  var stubbedSafeFunction1 = function(){};
-  var stubbedSafeFunction2 = function(){};
-  this.stub(SafeProxy, "safe");
-  SafeProxy.safe.withArgs(func1).returns(stubbedSafeFunction1);
-  SafeProxy.safe.withArgs(func2).returns(stubbedSafeFunction2);
-  //ACT:
-  var methodWithSafeParams = SafeProxy.safeParameters(originalMethod);
-  methodWithSafeParams("a",func1, func2);
-  //ASSERT:
-  var args = originalMethod.args[0];
-  assert.equal(args[0],"a","Calls the original method with the same value for each non-function parameter");
-  assert.equal(args[1], stubbedSafeFunction1,"Calls the original method with a safe version of each function parameter");
-  assert.equal(args[2], stubbedSafeFunction2,"Calls the original method with a safe version of each function parameter");
-});
 
-QUnit.test("Calling a SafeProxy.safeParameters method without passing it any function parameters will throw a SafeProxy.ArgumentError", function(assert){
+
+QUnit.test("Calling a SafeProxy.safe method on something that is not a function will throw a SafeProxy.ArgumentError", function(assert){
   "use strict";
-  var originalMethod = this.spy();
-  var safeMethod = SafeProxy.safeParameters(originalMethod);
-  originalMethod("string arg", 1, {});
+  var someObject = {};
   try{
-    safeMethod("string arg", 1, {});
+    var safeMethod = SafeProxy.safe(someObject);
   }
   catch (ex){
     assert.ok(ex instanceof SafeProxy.ArgumentError);
@@ -135,22 +114,4 @@ QUnit.test("Value of 'this' inside a function will be the same whether the funct
   assert.equal(unsafeThis, safeThis);
 });
 
-QUnit.test("Value of 'this' inside a function will be the same whether the function is called directly or through the SafeProxy.safeParameters v	version", function(assert){
-  "use strict";
-  var lastThis = null;
-  var rememberThis = function(funcParam){
-    funcParam();
-    lastThis = this;
-  };
-  var safeRememberThis = SafeProxy.safeParameters(rememberThis);
-  var fakeThis = new Object();
-  var someFunction = function(){
-  };
-  rememberThis.apply(fakeThis,[someFunction]);
-  var unsafeThis = lastThis;
-  rememberThis.trackingCode += 1;
-  safeRememberThis.apply(fakeThis,[someFunction]);
-  var safeThis = lastThis;
-  assert.equal(unsafeThis, safeThis);	
-});
 
